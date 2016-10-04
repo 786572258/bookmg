@@ -1,0 +1,181 @@
+sfsfsf<?php
+	include 'header.php';
+	include '../classes/Page.class.php';
+
+	//处理单个删除
+	if (isset($_GET['action']) && $_GET['action'] == 'del') {
+		//对磁盘的文件（图片）进行删除
+		//通过id到数据库中查找要删的图片的路径
+		$sql = 'select pic from books where id='.$_GET['id'];
+		if (($res = mysql_query($sql)) != '') {
+			$pic = mysql_fetch_row($res);
+			@unlink('../uploads/'.$pic[0]);
+			@unlink('../uploads/th_'.$pic[0]);
+		}
+
+		//对数据库的记录也进行删除
+		$sql = 'delete from books where id='.$_GET['id'];
+		if (mysql_query($sql) && mysql_affected_rows() > 0) {
+			//echo '删除成功';
+			echo '<script type="text/javascript">alert("删除成功")</script>';
+		} else {
+			echo '<script type="text/javascript">alert("删除失败")</script>';
+		}
+
+	//处理多个删除
+	} else if (isset($_POST['dosubmit']) && isset($_POST['id'])) {
+
+		//对磁盘的文件（图片）进行删除
+		//通过id到数据库中查找要删的图片的路径
+		$sql = 'select pic from books where id in('.implode(',', $_POST['id']).')';
+		//echo $sql;
+		if (($res = mysql_query($sql)) != '') {
+			while ($pic = mysql_fetch_row($res)) {
+				@unlink('../uploads/'.$pic[0]);
+				@unlink('../uploads/th_'.$pic[0]);
+			}
+		}
+
+		//对数据库的记录也进行删除
+		//$sql = 'delete from books where id in(1,3,4) ';
+		$sql = "delete from books where id in(".implode(',', $_POST['id']).")";
+		if (mysql_query($sql) && mysql_affected_rows() > 0) {
+			echo '<script type="text/javascript">alert("批量删除成功")</script>';
+		} else {
+			echo '<script type="text/javascript">alert("批量删除失败")</script>';
+
+		}
+	}
+
+
+	/*处理搜索*/
+	$where = "";
+	if ($_GET['act'] == 'ser') {
+		// echo '进来了';
+		// var_dump($_POST);
+		// echo '来到了查询';
+		//因为有分页的get传参数或搜索按钮的post来处理分页与查询
+		$tmp = $_REQUEST;
+		$arr = array();
+		$args = "";
+		if (!empty($tmp['bookname'])) {
+			//echo 'jinlai';
+			$bookname = $tmp['bookname'];
+			$arr[] = 'bookname like \'%'.$bookname.'%\' ';
+			$args .= '&bookname='.$tmp['bookname'];
+		}
+		if (!empty($tmp['author'])) {
+			$arr[] = "author like '%{$tmp['author']}%' ";
+			$args .= '&author='.$tmp['author'];
+		}
+		if (!empty($tmp['minprice'])) {
+			$arr[] = "price >= ".$tmp['minprice'];
+			$args .= '&minprice='.$tmp['minprice'];
+		}
+		if (!empty($tmp['maxprice'])) {
+			$arr[] = "price <= ".$tmp['maxprice'];
+			$args .= '&maxprice='.$tmp['maxprice'];
+		}
+
+		
+		//echo '<br>'.$args.'</br>';
+		//print_r($arr);
+		if (empty($arr)) {
+			$where = "";
+		}else {
+			//echo 'dfdfdfdf';
+			$where = " and ".implode(' and ', $arr);
+			//echo $where;
+		}
+		
+	} else {
+		
+	}
+
+
+	//实例化分页类
+	//获取总记录数
+	$sql = 'select count(*) from books WHERE 1=1 '.$where.' ';
+	$res = mysql_query($sql);
+	$count = mysql_fetch_row($res);
+	//print_r($count);exit();
+	//echo 'args--------';
+	//print_r($args);
+	$page = new Page($count[0], $pageSize, $args);
+
+
+	//获取列表数据
+	$sql = 'select id, bookname, publisher, author, price, ptime, pic, detail from books WHERE 1=1 '.$where.' '.$page->limit;
+	//echo 'sql语句：'.$sql;
+	
+	$res = mysql_query($sql);
+	
+
+	echo '<link href="../classes/Page.css" rel="stylesheet" type="text/css" />';
+	/*图书搜索*/
+	echo '<center id="search">';
+	echo '<h4>搜索图书</h4>';
+	echo '<form action="list.php?act=ser" method="post">';
+	echo '按书名：<input type="text" name="bookname" size=8 />&nbsp;&nbsp;';
+	echo '按作者：<input type="text" name="author" size=8 />&nbsp;&nbsp;';
+	echo '按价格：<input type="text" name="minprice" size=8 />-';
+	echo '<input type="text" name="maxprice" size=8 />&nbsp;&nbsp;';
+	echo '<input type="submit" name="sersubmit" class="button green" size=8 />&nbsp;&nbsp;';
+	echo '</form>';
+    echo '</center>'; 
+    
+    
+    echo '<center><h3>图书列表</h3></center>';
+	echo '<form action="list.php?page='.$page->page.'" method="post" onsubmit="return confirm(\'是否删除所选项\')">';
+	echo '<table align="center" cellpadding="0" cellspacing="0" >';
+	
+
+	//表头
+	echo '<tbody>';
+	echo '<tr>';
+	echo '<th>'.'多选'.'</th>';
+	echo '<th>'.'编号'.'</th>';
+	echo '<th>'.'图书名称'.'</th>';
+	echo '<th>'.'发布商'.'</th>';
+	echo '<th>'.'作者'.'</th>';
+	echo '<th>'.'价格'.'</th>';
+	echo '<th>'.'发布日期'.'</th>';
+	echo '<th>'.'图片'.'</th>';
+	echo '<th>'.'描述'.'</th>';
+	echo '<th>'.'操作'.'</th>';
+	echo '</tr>';
+    echo '</tbody>';
+	//内容
+	
+	while (list($id, $bookname, $publisher, $author, $price, $ptime, $pic, $detail) = mysql_fetch_row($res)) {
+		
+		echo '<tr>';
+		echo '<td><input type="checkbox" name="id[]" value="'.$id.'" /></td>';
+		echo '<td>'.$id.'&nbsp;'.'</td>';
+		echo '<td>《'.$bookname.'》&nbsp;'.'</td>';
+		echo '<td>'.$publisher.'&nbsp;'.'</td>';
+		echo '<td>'.$author.'&nbsp;'.'</td>';
+		echo '<td>￥'.$price.'&nbsp;'.'</td>';
+		echo '<td>'.date('Y-m-d H:i', $ptime).'&nbsp;'.'</td>';
+		echo '<td align="center">'.'<img width="100" src="../uploads/th_'.$pic.'"/>'.''.'</td>';
+		echo '<td>'.mb_substr($detail, 0, 20, 'utf-8').'...'.'&nbsp;'.'</td>';
+		echo '<td><a href="upd.php?action=upd&id='.$id.'"><span><img src="../images/pencil.png" title="编辑"/></span></a>&nbsp;<a onclick="return confirm(\'确认删除《'.$bookname.'》吗？\')" href="list.php?action=del'.$args.'&id='.$id.'&page='.$page->page.'"><span><img src="../images/cross.png" title="删除"/></span></a></td>';
+		
+		echo '</tr>';
+
+
+
+	}
+	echo '<tfoot>';
+	echo '<tr>';
+	echo '<td><input type="submit" name="dosubmit" class="button green" value="删除多个"></td>';
+	echo '<td colspan="9" align="right">'.$page->fpage().'</td>';
+	echo '</tr>';
+	echo '</tfoot>';
+	echo '</table>';
+	echo '</form>';
+?>
+
+<?php
+	include 'footer.php';
+?>
