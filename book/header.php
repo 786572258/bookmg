@@ -1,5 +1,6 @@
 <?
-		
+		 session_start();
+	
 	function isThisPath($str) {
 		$path = pathinfo($_SERVER['PHP_SELF'],PATHINFO_BASENAME);
 		
@@ -35,7 +36,8 @@
     
 
 	 //判断是否登陆
-	 session_start();
+
+
 	 if(!$_SESSION['admin']) {
 		echo "<script>alert('您还未登陆！');location.href='login.php'</script>";
 	 }

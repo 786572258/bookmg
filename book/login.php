@@ -176,6 +176,8 @@
 		$row = mysql_fetch_row($res);
 		if($row) {
 			$_SESSION['admin'] = $a_name;
+
+	
 			alertBack('登陆成功', 'list.php');
 			
 		} else {

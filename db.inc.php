@@ -2,7 +2,7 @@
 	$host = 'localhost';
 	$user = 'root';
 	$pass = 'root';
-	$db = 'tushuguanli';
+	$db = 'bookstore';
 	$link = mysql_connect($host, $user, $pass) or die('db连接失败');
 	mysql_select_db($db) or die('选择数据库失败');
 	mysql_query("set names utf8");
