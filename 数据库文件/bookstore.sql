@@ -76,15 +76,7 @@ CREATE TABLE `borrow` (
   PRIMARY KEY (`b_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
--- ----------------------------
--- Records of borrow
--- ----------------------------
-INSERT INTO `borrow` VALUES ('1', '4', '207', '1431355952', '1');
-INSERT INTO `borrow` VALUES ('2', '4', '207', '1431356012', '1');
-INSERT INTO `borrow` VALUES ('3', '4', '207', '1431356122', '1');
-INSERT INTO `borrow` VALUES ('4', '4', '206', '1431357867', '1');
-INSERT INTO `borrow` VALUES ('5', '17', '204', '1431358187', '1');
-INSERT INTO `borrow` VALUES ('6', '4', '206', '1431440998', '0');
+
 
 -- ----------------------------
 -- Table structure for cate
