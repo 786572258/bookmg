@@ -69,6 +69,9 @@ CREATE TABLE `borrow` (
   `b_uid` int(11) DEFAULT NULL,
   `b_book_id` int(11) DEFAULT NULL,
   `b_date` int(11) DEFAULT NULL,
+  `b_No` varchar(30) DEFAULT NULL,
+  `b_name` varchar(30) DEFAULT NULL,
+
   `b_status` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`b_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
